@@ -775,12 +775,15 @@ const firebaseConfig = {
   measurementId: "G-VGWCQV1KZC"
 };
 
+
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
     window.saveRatingsToFirebase = async function(raterName, data) {
         try {
+            
             await addDoc(collection(db, "ratings"), {
                 rater: raterName,
                 timestamp: new Date(),
@@ -791,6 +794,19 @@ const analytics = getAnalytics(app);
             console.error("Error adding document: ", e);
         }
     }
+     window.fetchRatingsFromFirebase = async function() {
+        const querySnapshot = await getDocs(collection(db, "ratings"));
+        const loadedRatings = {};
+
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            loadedRatings[data.rater] = data.ratings;
+        });
+
+        ratings = loadedRatings;
+        localStorage.setItem('internRankingRatings', JSON.stringify(ratings));
+        console.log("✅ Ratings loaded from Firebase");
+    };
 </script>
 </body>
 </html>
