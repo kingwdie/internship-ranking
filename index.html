@@ -560,7 +560,7 @@
             });
             
             saveToLocalStorage();
-            saveRatingsToFirebase(raterName, ratings[raterName]);
+            saveAllDataToFirebase();
             alert('Ratings saved successfully!');
         }
         
@@ -751,7 +751,7 @@
         
         // Initialize on page load
         window.onload = async function() {
-    await fetchRatingsFromFirebase();
+    await fetchAllDataFromFirebase();
     renderCandidates();
     renderRaters();
     updateRaterDropdowns();
@@ -761,45 +761,52 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyAgzOU66KXGzkANCqxFDeXOBsToqaOW-BM",
+  authDomain: "test-88d58.firebaseapp.com",
+  projectId: "test-88d58",
+  storageBucket: "test-88d58.firebasestorage.app",
+  messagingSenderId: "1098525792517",
+  appId: "1:1098525792517:web:0b0c1b6096352514f9ff6c",
+  measurementId: "G-VGWCQV1KZC"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    window.saveRatingsToFirebase = async function(raterName, data) {
+    window.saveAllDataToFirebase = async function() {
         try {
-            await addDoc(collection(db, "ratings"), {
-                rater: raterName,
-                timestamp: new Date(),
-                ratings: data
+            await setDoc(doc(db, "appData", "internship"), {
+                candidates,
+                raters,
+                criteria,
+                ratings,
+                timestamp: new Date()
             });
-            console.log("Ratings saved to Firebase!");
+            console.log("✅ All data saved to Firebase");
         } catch (e) {
-            console.error("Error adding document: ", e);
+            console.error("❌ Error saving to Firebase:", e);
         }
     };
 
-    window.fetchRatingsFromFirebase = async function() {
-        const querySnapshot = await getDocs(collection(db, "ratings"));
-        const loadedRatings = {};
-
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            loadedRatings[data.rater] = data.ratings;
-        });
-
-        ratings = loadedRatings;
-        localStorage.setItem('internRankingRatings', JSON.stringify(ratings));
-        console.log("✅ Ratings loaded from Firebase");
+    window.fetchAllDataFromFirebase = async function() {
+        try {
+            const docSnap = await getDoc(doc(db, "appData", "internship"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                candidates = data.candidates || [];
+                raters = data.raters || [];
+                criteria = data.criteria || ["Technical Skills", "Communication", "Problem Solving", "Work Ethic", "Cultural Fit"];
+                ratings = data.ratings || {};
+                console.log("✅ Data loaded from Firebase");
+            } else {
+                console.log("⚠️ No data found in Firebase");
+            }
+        } catch (e) {
+            console.error("❌ Error loading from Firebase:", e);
+        }
     };
 </script>
 </body>
