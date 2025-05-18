@@ -750,7 +750,7 @@
         }
         
         // Initialize on page load
-        window.onload = async function() {
+        window.onload = async function () {
     await fetchAllDataFromFirebase();
     renderCandidates();
     renderRaters();
@@ -761,24 +761,23 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyAgzOU66KXGzkANCqxFDeXOBsToqaOW-BM",
-  authDomain: "test-88d58.firebaseapp.com",
-  projectId: "test-88d58",
-  storageBucket: "test-88d58.firebasestorage.app",
-  messagingSenderId: "1098525792517",
-  appId: "1:1098525792517:web:0b0c1b6096352514f9ff6c",
-  measurementId: "G-VGWCQV1KZC"
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    window.saveAllDataToFirebase = async function() {
+    window.saveAllDataToFirebase = async function () {
         try {
-            await setDoc(doc(db, "appData", "internship"), {
+            await setDoc(doc(db, "rankingApp", "fullData"), {
                 candidates,
                 raters,
                 criteria,
@@ -791,9 +790,9 @@
         }
     };
 
-    window.fetchAllDataFromFirebase = async function() {
+    window.fetchAllDataFromFirebase = async function () {
         try {
-            const docSnap = await getDoc(doc(db, "appData", "internship"));
+            const docSnap = await getDoc(doc(db, "rankingApp", "fullData"));
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 candidates = data.candidates || [];
@@ -802,7 +801,7 @@
                 ratings = data.ratings || {};
                 console.log("✅ Data loaded from Firebase");
             } else {
-                console.log("⚠️ No data found in Firebase");
+                console.log("⚠️ No data found in Firestore");
             }
         } catch (e) {
             console.error("❌ Error loading from Firebase:", e);
