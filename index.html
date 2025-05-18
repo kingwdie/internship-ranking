@@ -201,7 +201,12 @@
                         <option value="">Select a rater</option>
                     </select>
                 </div>
-                
+        <div>
+                <select id="candidateSelect" onchange="renderRatingsGridSingle()">
+            <option value="">Select a candidate</option>
+                    </select>
+                </div>
+
                 <div id="ratingsForm" class="hidden">
                     <h3>Rate Candidates</h3>
                     <p>Rate each candidate on a scale of 1-10 for each criterion:</p>
@@ -297,7 +302,7 @@
         // Tab functionality
         function showTab(tabId) {
     if (tabId === 'results') {
-        const password = prompt("Enter password to access Results:");
+        const password = prompt("Enter password to access Results ADMIN USE ONLY!:");
         if (password !== '77382') {
             alert('Incorrect password.');
             return;
@@ -485,80 +490,91 @@
         
         // Ratings functionality
         function showRatingsForm() {
-            const raterSelect = document.getElementById('raterSelect');
-            const ratingsForm = document.getElementById('ratingsForm');
-            
-            if (!raterSelect.value) {
-                ratingsForm.classList.add('hidden');
-                return;
-            }
-            
-            ratingsForm.classList.remove('hidden');
-            renderRatingsGrid(raterSelect.value);
+    const raterSelect = document.getElementById('raterSelect');
+    const ratingsForm = document.getElementById('ratingsForm');
+    const candidateSelect = document.getElementById('candidateSelect');
+
+    if (!raterSelect.value) {
+        ratingsForm.classList.add('hidden');
+        return;
+    }
+
+    ratingsForm.classList.remove('hidden');
+
+    // Populate candidate dropdown
+    candidateSelect.innerHTML = '<option value="">Select a candidate</option>';
+    candidates.forEach(candidateName => {
+        const option = document.createElement('option');
+        option.value = candidateName;
+        option.textContent = candidateName;
+        candidateSelect.appendChild(option);
+    });
+}
+function renderRatingsGridSingle() {
+    const raterName = document.getElementById('raterSelect').value;
+    const candidateName = document.getElementById('candidateSelect').value;
+    const grid = document.getElementById('ratingsGrid');
+    grid.innerHTML = '';
+
+    if (!candidateName) return;
+
+    const row = document.createElement('div');
+    row.className = 'criteria-grid';
+
+    // Candidate name
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = candidateName;
+    nameDiv.style.fontWeight = 'bold';
+    row.appendChild(nameDiv);
+
+    // Rating selects for each criteria
+    for (let i = 1; i <= 5; i++) {
+        const select = document.createElement('select');
+        select.className = 'rating-select';
+        select.id = `rating_${candidateName.replace(/\s+/g, '_')}_${i}`;
+
+        for (let j = 1; j <= 10; j++) {
+            const option = document.createElement('option');
+            option.value = j;
+            option.textContent = j;
+            select.appendChild(option);
         }
-        
-        function renderRatingsGrid(raterName) {
-            const grid = document.getElementById('ratingsGrid');
-            grid.innerHTML = '';
-            
-            candidates.forEach(candidateName => {
-                const row = document.createElement('div');
-                row.className = 'criteria-grid';
-                
-                // Candidate name
-                const nameDiv = document.createElement('div');
-                nameDiv.textContent = candidateName;
-                nameDiv.style.fontWeight = 'bold';
-                row.appendChild(nameDiv);
-                
-                // Rating selects for each criteria
-                for (let i = 1; i <= 5; i++) {
-                    const select = document.createElement('select');
-                    select.className = 'rating-select';
-                    select.id = `rating_${candidateName.replace(/\s+/g, '_')}_${i}`;
-                    
-                    // Add options 1-10
-                    for (let j = 1; j <= 10; j++) {
-                        const option = document.createElement('option');
-                        option.value = j;
-                        option.textContent = j;
-                        select.appendChild(option);
-                    }
-                    
-                    // Set existing value if available
-                    if (ratings[raterName] && 
-                        ratings[raterName][candidateName] && 
-                        ratings[raterName][candidateName][i-1] !== undefined) {
-                        select.value = ratings[raterName][candidateName][i-1];
-                    }
-                    
-                    row.appendChild(select);
-                }
-                
-                grid.appendChild(row);
-            });
+
+        if (ratings[raterName] && ratings[raterName][candidateName] && ratings[raterName][candidateName][i - 1] !== undefined) {
+            select.value = ratings[raterName][candidateName][i - 1];
         }
+
+        row.appendChild(select);
+    }
+
+    grid.appendChild(row);
+}
+
         
         function saveRatings() {
-            const raterName = document.getElementById('raterSelect').value;
-            if (!raterName) return;
-            
-            if (!ratings[raterName]) {
-                ratings[raterName] = {};
-            }
-            
-            candidates.forEach(candidateName => {
-                const candidateRatings = [];
-                
-                for (let i = 1; i <= 5; i++) {
-                    const selectId = `rating_${candidateName.replace(/\s+/g, '_')}_${i}`;
-                    const rating = parseInt(document.getElementById(selectId).value);
-                    candidateRatings.push(rating);
-                }
-                
-                ratings[raterName][candidateName] = candidateRatings;
-            });
-            
+    const raterName = document.getElementById('raterSelect').value;
+    const candidateName = document.getElementById('candidateSelect').value;
+
+    if (!raterName || !candidateName) return;
+
+    if (!ratings[raterName]) {
+        ratings[raterName] = {};
+    }
+
+    const candidateRatings = [];
+    for (let i = 1; i <= 5; i++) {
+        const selectId = `rating_${candidateName.replace(/\s+/g, '_')}_${i}`;
+        const rating = parseInt(document.getElementById(selectId).value);
+        candidateRatings.push(rating);
+    }
+
+    ratings[raterName][candidateName] = candidateRatings;
+
+    saveToLocalStorage();
+    saveAllDataToFirebase();
+    alert(`Ratings for ${candidateName} saved successfully YAY!`);
+}
+
             saveToLocalStorage();
             saveAllDataToFirebase();
             alert('Ratings saved successfully!');
