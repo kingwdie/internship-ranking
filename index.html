@@ -750,7 +750,10 @@
         }
         
         // Initialize on page load
-        window.onload = init;
+        window.onload = async function() {
+    await fetchRatingsFromFirebase(); // Load shared ratings
+    init(); // Continue with rest of setup
+};
     </script>
 
 <script type="module">
