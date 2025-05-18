@@ -750,9 +750,13 @@
         }
         
         // Initialize on page load
-        window.onload = async function() {
-    await fetchRatingsFromFirebase(); // Load shared ratings from Firebase
-    init(); // Continue with setup
+       window.onload = async function() {
+    await fetchRatingsFromFirebase();
+
+    renderCandidates();
+    renderRaters();
+    updateRaterDropdowns();
+    updateCriteriaLabels();
 };
     </script>
 
