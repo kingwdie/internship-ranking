@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internship Candidate Ranking System</title>
+  <style>
+    /* [Same CSS as before, unchanged] */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Internship Candidate Ranking System</h1>
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('settings')">Settings</div>
+      <div class="tab" onclick="showTab('ratings')">Ratings</div>
+      <div class="tab" onclick="showTab('results')">Results</div>
+    </div>
+
+    <div id="settings" class="tab-content active">
+      <!-- [Same settings content as before, unchanged] -->
+    </div>
+
+    <div id="ratings" class="tab-content">
+      <div class="card">
+        <h2>Enter Ratings</h2>
+        <div>
+          <select id="raterSelect" onchange="showRatingsForm()">
+            <option value="">Select a rater</option>
+          </select>
+        </div>
+        <div id="ratingsForm" class="hidden">
+          <h3>Rate Candidates</h3>
+          <p>Rate one candidate at a time on a scale of 1-10 for each criterion:</p>
+
+          <div>
+            <select id="candidateSelect" onchange="renderRatingsGridSingle()">
+              <option value="">Select a candidate</option>
+            </select>
+          </div>
+
+          <div id="criteriaLabels" class="criteria-grid">
+            <div></div>
+            <div class="criteria-header" id="criteriaHeader1">Technical Skills</div>
+            <div class="criteria-header" id="criteriaHeader2">Communication</div>
+            <div class="criteria-header" id="criteriaHeader3">Problem Solving</div>
+            <div class="criteria-header" id="criteriaHeader4">Work Ethic</div>
+            <div class="criteria-header" id="criteriaHeader5">Cultural Fit</div>
+          </div>
+
+          <div id="ratingsGrid"></div>
+
+          <button onclick="saveRatings()">Save Ratings</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" class="tab-content">
+      <!-- [Same results content as before, unchanged] -->
+    </div>
+  </div>
+
+  <script>
+    // [Keep all existing variables and functions like init, renderCandidates, etc.]
+
+    function showRatingsForm() {
+      const raterSelect = document.getElementById('raterSelect');
+      const ratingsForm = document.getElementById('ratingsForm');
+      const candidateSelect = document.getElementById('candidateSelect');
+
+      if (!raterSelect.value) {
+        ratingsForm.classList.add('hidden');
+        return;
+      }
+
+      ratingsForm.classList.remove('hidden');
+      candidateSelect.innerHTML = '<option value="">Select a candidate</option>';
+      candidates.forEach(candidateName => {
+        const option = document.createElement('option');
+        option.value = candidateName;
+        option.textContent = candidateName;
+        candidateSelect.appendChild(option);
+      });
+    }
+
+    function renderRatingsGridSingle() {
+      const raterName = document.getElementById('raterSelect').value;
+      const candidateName = document.getElementById('candidateSelect').value;
+      const grid = document.getElementById('ratingsGrid');
+      grid.innerHTML = '';
+
+      if (!candidateName) return;
+
+      const row = document.createElement('div');
+      row.className = 'criteria-grid';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.textContent = candidateName;
+      nameDiv.style.fontWeight = 'bold';
+      row.appendChild(nameDiv);
+
+      for (let i = 1; i <= 5; i++) {
+        const select = document.createElement('select');
+        select.className = 'rating-select';
+        select.id = `rating_${candidateName.replace(/\s+/g, '_')}_${i}`;
+
+        for (let j = 1; j <= 10; j++) {
+          const option = document.createElement('option');
+          option.value = j;
+          option.textContent = j;
+          select.appendChild(option);
+        }
+
+        if (
+          ratings[raterName] &&
+          ratings[raterName][candidateName] &&
+          ratings[raterName][candidateName][i - 1] !== undefined
+        ) {
+          select.value = ratings[raterName][candidateName][i - 1];
+        }
+
+        row.appendChild(select);
+      }
+
+      grid.appendChild(row);
+    }
+
+    function saveRatings() {
+      const raterName = document.getElementById('raterSelect').value;
+      const candidateName = document.getElementById('candidateSelect').value;
+      if (!raterName || !candidateName) return;
+
+      if (!ratings[raterName]) ratings[raterName] = {};
+      const candidateRatings = [];
+
+      for (let i = 1; i <= 5; i++) {
+        const selectId = `rating_${candidateName.replace(/\s+/g, '_')}_${i}`;
+        const rating = parseInt(document.getElementById(selectId).value);
+        candidateRatings.push(rating);
+      }
+
+      ratings[raterName][candidateName] = candidateRatings;
+      saveToLocalStorage();
+      saveAllDataToFirebase();
+      alert(`Ratings for ${candidateName} saved successfully!`);
+    }
+
+    // Call init on load
+    window.onload = async function () {
+      await fetchAllDataFromFirebase();
+      renderCandidates();
+      renderRaters();
+      updateRaterDropdowns();
+      updateCriteriaLabels();
+    };
+  </script>
+
+  <script type="module">
+    // [Same Firebase script block as before, unchanged]
+  </script>
+</body>
+</html>
