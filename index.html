@@ -11,7 +11,7 @@
             margin: 0;
             padding: 20px;
             color: #333;
-        }                    
+        }
         h1, h2, h3 {
             color: #2c3e50;
         }
@@ -750,9 +750,8 @@
         }
         
         // Initialize on page load
-       window.onload = async function() {
+        window.onload = async function() {
     await fetchRatingsFromFirebase();
-
     renderCandidates();
     renderRaters();
     updateRaterDropdowns();
@@ -765,12 +764,12 @@
     import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
-       apiKey: "AIzaSyAgzOU66KXGzkANCqxFDeXOBsToqaOW-BM",
-  authDomain: "test-88d58.firebaseapp.com",
-  projectId: "test-88d58",
-  storageBucket: "test-88d58.firebasestorage.app",
-  messagingSenderId: "1098525792517",
-  appId: "1:1098525792517:web:0b0c1b6096352514f9ff6c",
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -787,7 +786,7 @@
         } catch (e) {
             console.error("Error adding document: ", e);
         }
-    }
+    };
 
     window.fetchRatingsFromFirebase = async function() {
         const querySnapshot = await getDocs(collection(db, "ratings"));
